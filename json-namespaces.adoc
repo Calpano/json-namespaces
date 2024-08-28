@@ -107,9 +107,9 @@ Now lets add the city element from a different schema.
 [source,xml]
 ----
 <?xml
-  xmlns="https://xam.de/ns/2024/geo/v17/"  <1>
-  xmlns:destatis="https://example.com/foo#"    <2>
-  xmlns:og="http://ogp.me/ns#">   <2>
+  xmlns="https://xam.de/ns/2024/geo/v17/" <1>
+  xmlns:destatis="https://example.com/foo#" <2>
+  xmlns:og="http://ogp.me/ns#"> <2>
 <adress>
   <country>Germany</country>
   <city>Spandau</city>
@@ -178,9 +178,9 @@ To keep JSON readable, we propose to define and use namespace mappings.
 ----
 {
 	"_namespaces": {
-		"_": "http://example.com/ns/",              <1>
-		"destatis": "https://example.com/foo#",     <2>
-		"og": "http://ogp.me/ns#"                   <3>
+		"_": "http://example.com/ns/", <1>
+		"destatis": "https://example.com/foo#", <2>
+		"og": "http://ogp.me/ns#" <3>
 	}
 }
 ----
@@ -190,13 +190,23 @@ To keep JSON readable, we propose to define and use namespace mappings.
 
 
 === Adding JSON Namespaces to JSON Data
+.Specification
+****
+Namespace prefix usage:: The syntax is __(Namespace Prefix)__ `{underscore}` __(Namespace Suffix)__
+Expanded form:: It resolves to __(Namespace Expansion)__ __(Namespace Suffix)__.
+
+- Namespace prefixes can be used on the key name in any JSON object.
+- Only one namespace prefix can be added to a single key.
+- The key `{underscore}` on its own does not map to anything, espacially not the the default namespace.
+****
+
 .Example: Use a JSON Namespace
 [source,json]
 ----
 "address": {
-	"country": "Berlin",                 <1>
-	"city": "Berlin",                    <1>
-	"destatis_city": "Berlin-Spandau"	   <2>
+	"country": "Berlin", <1>
+	"city": "Berlin", <1>
+	"destatis_city": "Berlin-Spandau" <2>
 }
 ----
 <1> In the default namespace
@@ -225,7 +235,7 @@ To keep JSON readable, we propose to define and use namespace mappings.
 === Processing JSON with Namespaces
 .Interpretation as standard JSON
 - Namespace declarations can be stripped before normal processing.
-- Namespace prefixes can be resoved to full names.
+- Namespace prefixes can be resoved to full names. The involves replacing
 
 .Full Example in Expanded Form
 [source,json]

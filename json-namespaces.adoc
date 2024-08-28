@@ -177,10 +177,10 @@ To keep JSON readable, we propose to define and use namespace mappings.
 [source,json]
 ----
 {
-	_namespaces: {
-		"_": "http://example.com/ns/",  <1>
+	"_namespaces": {
+		"_": "http://example.com/ns/",              <1>
 		"destatis": "https://example.com/foo#",     <2>
-		"og": "http://ogp.me/ns#"      <3>
+		"og": "http://ogp.me/ns#"                   <3>
 	}
 }
 ----
@@ -193,10 +193,10 @@ To keep JSON readable, we propose to define and use namespace mappings.
 .Example: Use a JSON Namespace
 [source,json]
 ----
-address: {
+"address": {
 	"country": "Berlin",                 <1>
 	"city": "Berlin",                    <1>
-	"destatis_city": "Berlin-Spandau"	 <2>
+	"destatis_city": "Berlin-Spandau"	   <2>
 }
 ----
 <1> In the default namespace
@@ -206,16 +206,16 @@ address: {
 [source,json]
 ----
 {
-	_namespaces: {
-		"_": "http://example.com/ns/",  <1>
-		"destatis": "https://example.com/foo#",     <2>
-		"og": "http://ogp.me/ns#"      <3>
+	"_namespaces": {
+		"_": "http://example.com/ns/",
+		"destatis": "https://example.com/foo#",
+		"og": "http://ogp.me/ns#"
 	},
 	"addresses": [
 		{
-			"country": "Berlin",                 <1>
-			"city": "Berlin",                    <1>
-			"destatis_city": "Berlin-Spandau"	 <2>
+			"country": "Berlin",
+			"city": "Berlin",
+			"destatis_city": "Berlin-Spandau"
 		}
 	]
 }
@@ -231,19 +231,19 @@ address: {
 [source,json]
 ----
 {
-    <1>
 	"addresses": [
 		{
-			"country": "Berlin",                 <1>
-			"city": "Berlin",                    <1>
-			"https://example.com/foo#city": "Berlin-Spandau"	 <2>
+			"country": "Berlin",
+			"city": "Berlin",
+			"https://example.com/foo#city": "Berlin-Spandau"
 		}
 	]
 }
 ----
-<1> Namespace declaration object stripped
+Namespace declaration object has been stripped.
 
 NOTE: Expanded form is optional. It is only required, when merging data from different systems, using the same namespace prefixes with different namespace expansions.
+
 
 
 == Working with JSON Namespaces

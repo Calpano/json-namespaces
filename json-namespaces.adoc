@@ -31,6 +31,12 @@ While working in the _Open Canvas Working Group_ footnote:[A workgroup with the 
 Taken to its logical extreme, this can be seen as another step in the JSON-stack re-inventing tools from the XML-stack. In this regards, let's define the concept for JSON clearly.
 
 == Background
+
+=== Related Work
+https://so.nwalsh.com/2017/05/24/jsns[Norman Walsh] wrote in 2017 already about missing namespaces.
+At that time, https://en.wikipedia.org/wiki/JSON-LD[JSON-LD] was the only available option in the right direction, but not really solving the issue.
+
+
 === Graphics Library Transmission Format (glTF)
 The __glTF__ (https://en.wikipedia.org/wiki/GlTF[Graphics Library Transmission Format] or GL Transmission Format and formerly known as WebGL Transmissions Format or WebGL TF) is a file format for three-dimensional scenes and models.
 GlTF https://en.wikipedia.org/wiki/GlTF#Extensions[extensions] are in wide-spread use.

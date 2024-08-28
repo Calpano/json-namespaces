@@ -1,0 +1,259 @@
+= JSON Namespaces (Proposal)
+:source-highlighter: highlightjs
+:experimental:
+:stem:
+:sectnums:
+:icons: font
+:imagesdir: ./../images
+:toc: macro
+:underscore: _
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+// https://gist.github.com/dcode/0cfbf2699a1fe9b46ff04c41721dda74
+
+== Document Status
+This document is licensed under the MIT License.
+
+.Version History
+- 2024-08-28, revision 1, Max Völkel. Published at https://github.com/Calpano/json-namespaces[].
+
+
+toc::[]
+
+== Introduction
+While working in the _Open Canvas Working Group_ footnote:[A workgroup with the goal of creating an interop format for "canvas" tools] I was introduced by members of the _glTF_ working group to their current mechanism for managing extensions in a JSON-based format.
+Taken to its logical extreme, this can be seen as another step in the JSON-stack re-inventing tools from the XML-stack. In this regards, let's define the concept for JSON clearly.
+
+== Background
+=== Graphics Library Transmission Format (glTF)
+The __glTF__ (https://en.wikipedia.org/wiki/GlTF[Graphics Library Transmission Format] or GL Transmission Format and formerly known as WebGL Transmissions Format or WebGL TF) is a file format for three-dimensional scenes and models.
+GlTF https://en.wikipedia.org/wiki/GlTF#Extensions[extensions] are in wide-spread use.
+The mechanism is document in the https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#specifying-extensions[spec], published by the Khronos Group.
+
+TIP: The glTF extension mechanism was the main inspiration for JSON namespaces.
+
+=== XML
+The XML structual model (https://www.w3.org/TR/xml-infoset/[_XML Information Set]) consists of _elements_ and _attributes_ footnote:[Ignoring for now the _processing instruction_, _comment_, _entity reference_, _document type declaration_ elements].
+
+XML element::
+Can contain a list of sub-elements or text (or even a mix of both).
+
+XML attribute::
+Each _XML element_ can have a map of named keys to String values. No nesting is allowed in XML attributes.
+
+
+==== Namespaces in XML
+.References
+- https://en.wikipedia.org/wiki/XML_namespace[Wikipedia]
+- https://www.w3.org/TR/xml-names/[W3C Namespaces in XML 1.0 (Third Edition)] W3C Recommendation 8 December 2009
+- https://www.w3.org/TR/xml-names11/[Namespaces in XML 1.1 (Second Edition)] W3C Recommendation 16 August 2006
+
+NOTE: XML 1.1 basically only allows more Unicode characters in element names and attribute names.
+
+Why?
+A central idea in XML was the notion of mixing several XML-based documents together, in the sense that one document could contains data, specified for another schema.
+XML uses XML Schema footnote:[This seems to be the current main-stream schema language. Several other schema languages have also been proposed. Previously _Document Type Definitons_ (DTD) had been used.] to define the structure of an XML document. In this regard, JSON Schema plays a similar role in the JSON ecosystem.
+Back to XML.
+
+.How
+An XML document looks, as an example footnote:[The example does not show useful XML usage, but syntax elements.], like this:
+
+[source,xml]
+----
+<adress>
+  <country>Germany</country>
+  <city capital="yes">Berlin</city>
+</address>
+----
+
+We assume we have the element `address`, `country` and `city` defined in our schema.
+
+To have unique element names in XML, an XML element can be given a long, unique name.
+These unique names are based on the Internat domain name system, which establishes a working mechanism to buy pieces of a namespace (domains). When a domain becomes part of an identifier, the assignment of namespace roots is a solved problem. A domain owner can use any URL on its domain as the namespace for an XML element.
+So my "city" element could be extended to by my "https://xam.de/ns/2024/geo/v17/city" element.
+In XML, this would look ugly:
+
+[source,xml]
+----
+<https://xam.de/ns/2024/geo/v17/adress>
+  <https://xam.de/ns/2024/geo/v17/country>Germany</https://xam.de/ns/2024/geo/v17/country>
+  <https://xam.de/ns/2024/geo/v17/city>Berlin</https://xam.de/ns/2024/geo/v17/city>
+</https://xam.de/ns/2024/geo/v17/address>
+----
+
+So XML uses the usual method of stating a prefix-mapping in the file. The real XML thus looks like this:
+
+
+[source,xml]
+----
+<?xml xmlns="https://xam.de/ns/2024/geo/v17/">
+<adress>
+  <country>Germany</country>
+  <city>Spandau</city>
+</address>
+----
+
+This assigns the _default namespace_ for all namespaces not defining an explicit namespace to
+`https://xam.de/ns/2024/geo/v17/`.
+
+Now lets add the city element from a different schema.
+
+[source,xml]
+----
+<?xml
+  xmlns="https://xam.de/ns/2024/geo/v17/"  <1>
+  xmlns:destatis="https://example.com/foo#"    <2>
+  xmlns:og="http://ogp.me/ns#">   <2>
+<adress>
+  <country>Germany</country>
+  <city>Spandau</city>
+  <destatis:city>Berlin-Spandau</destatis:city>
+</address>
+----
+<1> The root/default namespace
+<2> Additional namespace prefix mappings
+
+NOTE: XML Namespaces were not part of the initial XML proposal.
+It was added later at the cost of re-purposing the attribute name `xmlns` (defining namespace mappings) and using colons (`:`) in attribute names (using namespace mappings).
+
+=== JSON
+.References
+- https://www.json.org/json-en.html[JSON.org]
+
+
+JSON has a refreshingly simple structural model, with three element types:
+
+JSON object::
+An object is an unordered map of named keys to other elements.
+
+JSON array::
+An array is a list (encodes order) of other elements.
+
+JSON primitive::
+As primitives, JSON provides _String_, _Number_, _Boolean_, _Null_.
+
+
+== Proposal: JSON Namespaces
+[NOTE]
+.Comparing XML and JSON
+--
+A JSON object resembles an XML element, as it allows nesting.
+On the other hand, XML attributes allow map-like key-values.
+A JSON array can only be compared to an XML element, as no other XML element allows nesting.
+--
+
+.Idea
+In JSON, we find named keys in the JSON object.
+Conceptually, we propose to use unique URIs as JSON object keys.
+To keep JSON readable, we propose to define and use namespace mappings.
+
+=== Defining JSON Namespaces
+.Specification
+****
+- Namespaces are defined by using a key name of `{underscore}namespaces` on any JSON object.
+- The value of such a __namespace declaration object__ is a JSON object.
+- The __namespace declaration object__ uses __namespace prefixes__ as keys and __namespace expansions__ as the value (datatype: String).
+- The __default namespace__ is stated via the reserved key `{underscore}` (a single underscore).
+
+- Multiple __namespace declaration object__ are allowed per JSON document.
+- Later definitions overwrite earlier definitions.
+- No __namespace declaration object__ is required.
+- In each __namespace declaration object__, a default namespace is not required.
+****
+
+.Good Practice
+- It is good practice to use just one definition, near the top of the data.
+- It is good practive to use URIs as part of namespace expansions to re-use the existing domain name system for assigning namespace strings to people and organisations.
+- It is good practive to use resolvable URIs, so that the resolved URI provides more human-readable information.
+- If resolvable URIs are used, the namespace expansion URI should resolve to a JSON schema, defining the structure of elements. #TODO Check how well this works with current JSON Schema#.
+
+.Example: Define a JSON Namespace
+[source,json]
+----
+{
+	_namespaces: {
+		"_": "http://example.com/ns/",  <1>
+		"destatis": "https://example.com/foo#",     <2>
+		"og": "http://ogp.me/ns#"      <3>
+	}
+}
+----
+<1> Define the root/default namespace
+<2> An example namespace for the "destatis" prefix
+<3> The Facebook Open Graph namespace, mapped to prefix `og`
+
+
+=== Adding JSON Namespaces to JSON Data
+.Example: Use a JSON Namespace
+[source,json]
+----
+address: {
+	"country": "Berlin",                 <1>
+	"city": "Berlin",                    <1>
+	"destatis_city": "Berlin-Spandau"	 <2>
+}
+----
+<1> In the default namespace
+<2> In the _destatis_ namespace
+
+.Full Example
+[source,json]
+----
+{
+	_namespaces: {
+		"_": "http://example.com/ns/",  <1>
+		"destatis": "https://example.com/foo#",     <2>
+		"og": "http://ogp.me/ns#"      <3>
+	},
+	"addresses": [
+		{
+			"country": "Berlin",                 <1>
+			"city": "Berlin",                    <1>
+			"destatis_city": "Berlin-Spandau"	 <2>
+		}
+	]
+}
+----
+
+
+=== Processing JSON with Namespaces
+.Interpretation as standard JSON
+- Namespace declarations can be stripped before normal processing.
+- Namespace prefixes can be resoved to full names.
+
+.Full Example in Expanded Form
+[source,json]
+----
+{
+    <1>
+	"addresses": [
+		{
+			"country": "Berlin",                 <1>
+			"city": "Berlin",                    <1>
+			"https://example.com/foo#city": "Berlin-Spandau"	 <2>
+		}
+	]
+}
+----
+<1> Namespace declaration object stripped
+
+NOTE: Expanded form is optional. It is only required, when merging data from different systems, using the same namespace prefixes with different namespace expansions.
+
+
+== Working with JSON Namespaces
+
+=== Merging
+Two arbitrary JSON objects can be merged, by coyping the key-value pairs from one (source) object to another (target) object.
+
+
+=== Validation
+#TODO Describe how to use JSON Schema to allow extensions.#
+
+
+

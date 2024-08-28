@@ -1,0 +1,3 @@
+= JSON Namespaces
+
+A way how namespaces can be added to JSON. Please comment on the spec.
